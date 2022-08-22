@@ -1,9 +1,5 @@
 import math
 
-# Coordenadas de del hospital de SantPau
-LATITUD, LONGITUD = 41.411470, 2.174364
-COORDS=(LATITUD, LONGITUD)
-
 # Código obtenido de 
 # https://stackoverflow.com/questions/19412462/getting-distance-between-two-points-based-on-latitude-longitude
 # Nota: Esta función es simétrica/comutativa. En realida dno tiene sentido hablar de origen y destino. Sería mejor coords1, coords2
