@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify
-# import pandas as pd
+import pandas as pd
 import time
+import datetime
 
 from buscador_gasolineras import GasolinerasManager
 
@@ -31,13 +32,39 @@ def base_page():
 		ERROR=str(e)
 		return ERROR
 
+MAX_ROWS=5
+
 @gasolineras_router.route('/buscar_gasolinera', methods=['GET'])
 def buscar_gasolinera():
 	try:
 		request_params=request.args.to_dict()
 		print(request_params)
-		response = jsonify({'some': 'data'})
+		
+		G.buscar_datos()
+		G.buscar_mejor_gasolinera(
+			coordenadas_actuales=(float(request_params['latitude']), float(request_params['longitude'])),
+			litros_a_repostar=int(request_params['litros']),
+			consumo=float(request_params['consumo'])
+			)
+
+		response_data=[]
+		now=int(time.time())
+		for gasolinera in G.DATA[:MAX_ROWS]:
+			response_data.append({
+				'Empresa':gasolinera.empresa,
+				'Dirección':gasolinera.direccion,
+				'Precio (€/L)':gasolinera.precio,
+				'Distancia (km)':gasolinera.distancia,
+				'Coste total (€)':round(gasolinera.coste_total,2),
+				'Tiempo transcurrido desde la última actualización':str(datetime.timedelta(seconds=now-gasolinera.hora_ultima_actualizacion))
+			})
+		# print(response_data)
+
+		df=pd.DataFrame.from_dict(response_data)
+
+		response=jsonify({'table':df.to_html(index=False)})
 		response.headers.add('Access-Control-Allow-Origin', '*')
+
 		return response
 	except Exception as e:
 		global ERROR
